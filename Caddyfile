@@ -1,0 +1,19 @@
+# Caddyfile (Version Corrigée et Professionnelle)
+
+# On dit à Caddy de ne pas essayer de passer en HTTPS automatiquement
+{
+    auto_https off
+}
+
+# On définit notre site. Il écoute sur le port 80 à l'intérieur du conteneur.
+http://localhost {
+    # On définit un "matcher" nommé @api pour toutes les requêtes commençant par /api/
+    @api path /api/*
+    # On dit à Caddy de rediriger toutes les requêtes qui correspondent à @api vers le backend.
+    # Cette méthode ne supprime PAS le préfixe.
+    reverse_proxy @api backend:8080
+
+    # Toutes les autres requêtes qui ne correspondent pas à @api vont au frontend.
+    # Ceci agit comme une règle "fourre-tout".
+    reverse_proxy frontend:80
+}

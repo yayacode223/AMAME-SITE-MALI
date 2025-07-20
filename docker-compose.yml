@@ -1,0 +1,77 @@
+# docker-compose.yml
+
+version: "3.8"
+
+services:
+  database:
+    image: postgres:15-alpine
+    container_name: myapp-database
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: amame_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - database_data:/var/lib/postgresql/data
+    healthcheck: # <--- AJOUTEZ CETTE SECTION
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    container_name: myapp-backend
+    restart: unless-stopped # <--- AJOUTEZ CETTE LIGNE
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on: # <--- AJOUTEZ CETTE SECTION
+      database:
+        condition: service_healthy
+    volumes: # <--- AJOUTEZ CETTE SECTION
+      - ./backend/uploads:/app/uploads # <--- AJOUTEZ CETTE LIGNE
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: myapp-frontend
+    restart: unless-stopped # <--- AJOUTEZ CETTE LIGNE (bonne pratique)
+    ports:
+      - "80:80"
+
+   # -- NOUVELLE SECTION POUR LES SCRAPERS --
+  scraper-etablissement:
+    build:
+      context: ./scraper # Indique où trouver le Dockerfile
+    # NE PAS METTRE DE 'command' ICI
+    depends_on:
+      database:
+        condition: service_healthy # Attend que la BDD soit prête
+
+  scraper-opportunity:
+    build:
+      context: ./scraper
+    depends_on:
+      database:
+        condition: service_healthy
+
+   
+  caddy:
+    image: caddy:2-alpine
+    container_name: myapp-proxy
+    restart: unless-stopped
+    ports:
+
+     - "8081:80" # On expose Caddy sur le port 80c
+     - "443:443" # Pour le HTTPS plus tard
+    volumes:
+     - ./Caddyfile:/etc/caddy/Caddyfile # On monte notre fichier de config
+
+
+volumes:
+  database_data:
