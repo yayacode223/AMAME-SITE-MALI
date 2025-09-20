@@ -27,7 +27,7 @@ Suivez ces étapes pour lancer l'application complète sur votre machine locale.
 
 1.  **Cloner le dépôt :**
     ``` terminal bash 
-    git clone https://github.com/votre-nom/votre-projet.git
+    git clone https://github.com/yayacode223/AMAME-SITE-MALI.git AMAME-SITE-WEB
     cd AMAME-SITE-WEB
     ```
 
@@ -41,7 +41,7 @@ Suivez ces étapes pour lancer l'application complète sur votre machine locale.
 3.  **Lancer l'application :**
     Cette commande va construire les images Docker (la première fois peut être longue) et démarrer tous les services de l'application web (Frontend, Backend, Base de Données, Reverse Proxy).
     ``` terminal bash 
-    docker-compose up -d
+    docker-compose up -d 
     ```
     *Pour vérifier que tout a bien démarré, utilisez la commande `docker-compose ps`. Tous les services devraient avoir le statut `Up` ou `healthy`.*
 
